@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kgc.mybatis2018.dao.AddressMapper">
+
+    <select id="selectById" resultType="Address">
+         select * from smbms_address  where userId = #{userId}
+    </select>
+</mapper>

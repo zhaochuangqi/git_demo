@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+    <!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    <mapper namespace="com.kgc.mybatis2018.dao.UserMapper">
+
+    <select id="selectUserCount" resultType="int">
+        select count(*) from smbms_user
+    </select>
+
+    <select id="selectAllUser" resultType="User">
+        SELECT * FROM smbms_user
+    </select>
+
+    <select id="selectAll" resultType="User" databaseId="mysql">
+        select * from smbms_user where 1=1
+    </select>
+
+    <select id="selectUserByUserName" resultType="User">
+        select * from smbms_user where userName=#{userName}
+    </select>
+
+    <select id="findUserByNameAndSex" resultType="User">
+        select * from smbms_user where userName=#{userName} and gender=#{gender}
+    </select>
+
+    <select id="selectUser" resultType="User">
+        select * from smbms_user where userName like concat('%', #{userName},'%')
+    </select>
+
+    <select id="selectUser2" resultType="User">
+        select * from smbms_user where userName like concat('%', #{userName},'%')
+    </select>
+
+    <select id="findUserByTwoUser" resultType="User">
+        select * from  smbms_user where userName =#{user1.userName} and gender=#{user2.gender}
+    </select>
+
+    <select id="findUserLikeName" resultType="User">
+         select * from smbms_user where userName like '%${userName}%'
+    </select>
+
+    <select id="selectUser3" resultType="User">
+        select smbms_user.*,smbms_role.roleName as userRoleName from smbms_user,smbms_role where smbms_user.userRole=smbms_role.id
+    </select>
+
+    <select id="selectUser4" resultMap="UserMap">
+        select smbms_user.*,smbms_role.roleName from smbms_user,smbms_role where smbms_user.userRole=smbms_role.id
+    </select>
+    <resultMap id="UserMap" type="User">
+        <result column="roleName" property="userRoleName"></result>
+    </resultMap>
+
+    <insert id="addUser" keyProperty="id" useGeneratedKeys="true">
+        insert into smbms_user(userCode,userName, userPassword) values (#{userCode},#{userName},#{userPassword})
+    </insert>
+
+    <update id="modify">
+        update smbms_user
+        set userPassword=#{userPassword}
+        where id=#{id}
+    </update>
+
+    <delete id="delete">
+      delete from smbms_user where id=#{id}
+    </delete>
+
+    <select id="getUserListByRoleId" resultMap="userRoleMap">
+        SELECT
+        smbms_user.*
+        , smbms_role.roleName
+        FROM
+        smbms.smbms_user
+        INNER JOIN smbms.smbms_role
+        ON (smbms_user.userRole = smbms_role.id)
+        WHERE userRole=#{userRole}
+    </select>
+    <resultMap id="userRoleMap" type="User">
+        <id property="id" column="id"></id>
+        <association property="roles" javaType="Role">
+            <id property="id" column="userRole"></id>
+        </association>
+    </resultMap>
+
+    <select id="selectById" resultMap="userRoleMapLaze">
+        select * from smbms_user where id = #{id}
+    </select>
+
+    <resultMap id="userRoleMapLaze" type="User">
+        <id column="id" property="id"></id>
+      <association property="roles" select="com.kgc.mybatis2018.dao.RoleMapper.selectById" column="userRole"></association>
+    </resultMap>
+
+   <select id="selectById2" resultMap="userAddressMap">
+        select
+        smbms_user.*
+        , smbms_address.id as addressId
+        , smbms_address.postCode
+        , smbms_address.contact
+        , smbms_address.tel
+        from
+        smbms.smbms_address
+        inner join smbms.smbms_user
+        on (smbms_address.userId = smbms_user.id)
+        where smbms_user.id= #{id}
+    </select>
+
+    <resultMap id="userAddressMap" type="User">
+        <id column="id" property="id"></id>
+        <!--处理role对象-->
+        <association property="roles" select="com.kgc.mybatis2018.dao.RoleMapper.selectById" column="userRole"></association>
+        <!--加载地址  集合对象-->
+        <collection property="addresss" ofType="Address">
+            <!--地址的映射-->
+            <id column="addressId" property="id"></id>
+        </collection>
+    </resultMap>
+
+
+    <select id="selectById3" resultMap="userAddressMap2">
+        select * from smbms_user where id = #{id}
+    </select>
+
+    <resultMap id="userAddressMap2" type="User">
+        <id column="id" property="id"></id>
+        <!--处理role对象-->
+        <association property="roles" select="com.kgc.mybatis2018.dao.RoleMapper.selectById" column="userRole"></association>
+        <!--加载地址  集合对象-->
+        <collection property="addresss" select="com.kgc.mybatis2018.dao.AddressMapper.selectById" column="id"></collection>
+    </resultMap>
+
+    <cache eviction="FIFO" flushInterval="60000"
+           size="512" readOnly="true"/>
+    <!--   <select id="selectUser1" resultType="User">
+          select * from smbms_user
+          <where>
+              <if test="userName!=null and userName !=''">
+              and userName like concat('%',#{userName},'%')
+              </if>
+              <if test="userRole!=null and userRole!=-1">
+                  and userRole=#{userRole}
+              </if>
+          </where>
+  </select> -->
+
+    <select id="selectUser1" resultType="User">
+        select * from smbms_user
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="userName!=null and userName !=''">
+                and userName like concat('%',#{userName},'%')
+            </if>
+            <if test="userRole!=null and userRole!=-1">
+                and userRole=#{userRole}
+            </if>
+        </trim>
+    </select>
+
+    <!--  <update id="modify2" parameterType="User">
+          update smbms_user
+              <set>
+                  <if test="userCode != null">userCode=#{userCode},</if>
+                 <if test="userName != null">userName=#{userName},</if>
+                 <if test="userPassword != null">userPassword=#{userPassword},</if>
+                 <if test="gender != null">gender=#{gender},</if>
+                 <if test="birthday != null">birthday=#{birthday},</if>
+                 <if test="phone != null">phone=#{phone},</if>
+                 <if test="address != null">address=#{address},</if>
+                 <if test="userRole != null">userRole=#{userRole},</if>
+                 <if test="modifyBy != null">modifyBy=#{modifyBy},</if>
+                 <if test="modifyDate != null">modifyDate=#{modifyDate},</if>
+              </set>
+              where id = #{id}
+     </update> -->
+
+    <update id="modify2" parameterType="User">
+        update smbms_user
+        <trim prefix="set" suffix=" where id = #{id}" suffixOverrides=",">
+            <if test="userCode != null and userCode !=''">userCode=#{userCode},</if>
+            <if test="userName != null">userName=#{userName},</if>
+            <if test="userPassword != null">userPassword=#{userPassword},</if>
+            <if test="gender != null">gender=#{gender},</if>
+            <if test="birthday != null">birthday=#{birthday},</if>
+            <if test="phone != null">phone=#{phone},</if>
+            <if test="address != null">address=#{address},</if>
+            <if test="userRole != null">userRole=#{userRole},</if>
+            <if test="modifyBy != null">modifyBy=#{modifyBy},</if>
+            <if test="modifyDate != null">modifyDate=#{modifyDate},</if>
+        </trim>
+    </update>
+
+    <select id="getUserByRoleId_foreach_array" resultType="User" >
+        select * from smbms_user
+        <where>
+            <if test="rids!=null and rids.length>0">
+                and userRole in
+                <foreach collection="rids" open="(" close=")" item="rid" separator=",">
+                    #{rid}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="getUserByRoleId_foreach_list" resultType="User" >
+        select * from smbms_user
+        <where>
+            <if test="rids!=null and rids.size()>0">
+                and userRole in
+                <foreach collection="rids" open="(" close=")" item="rid" separator=",">
+                    #{rid}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="getUserByRoleId_foreach_map" resultType="User" >
+        select * from smbms_user
+        <where>
+            <if test="rids!=null and rids.size()>0">
+                and userRole in
+                <foreach collection="rids" open="(" close=")" item="rid" separator=",">
+                    #{rid}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="getUserList_choose" resultType="User">
+        select * from smbms_user
+        <choose>
+            <when test="value==1">
+                order by id
+            </when>
+            <when test="value==2">
+                order by id desc
+            </when>
+            <when test="value==3">
+                order by birthday
+            </when>
+            <otherwise>
+                order by birthday desc
+            </otherwise>
+        </choose>
+    </select>
+
+</mapper>

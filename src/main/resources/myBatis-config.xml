@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <properties resource="database.properties" />
+    <settings>
+        <setting name="logImpl" value="LOG4J"/>
+        <setting name="mapUnderscoreToCamelCase" value="true"></setting>
+        <setting name="autoMappingBehavior" value="FULL"/>
+        <setting name="cacheEnabled" value="true"/>
+        <!-- 打开延迟加载的开关 -->
+        <setting name="lazyLoadingEnabled" value="true" />
+        <!-- 将积极加载改为消极加载  按需加载 -->
+        <setting name="aggressiveLazyLoading" value="false"/>
+    </settings>
+    <!--仅仅只关联XML配置，简写冗长的Java类名-->
+    <typeAliases>
+       <!-- <typeAlias type="com.kgc.mybatis2018.entity.User" alias="user"></typeAlias>-->
+        <package name="com.kgc.mybatis2018.entity"></package>
+    </typeAliases>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC" />
+            <dataSource type="POOLED">
+                <property name="driver" value="${driver}" />
+                <property name="url" value="${url}" />
+                <property name="username" value="${user}" />
+                <property name="password" value="${password}" />
+            </dataSource>
+        </environment>
+    </environments>
+    <databaseIdProvider type="DB_VENDOR">
+        <property name="SQL Server" value="sqlserver" />
+        <property name="MySQL" value="mysql" />
+        <property name="DB2" value="db2" />
+        <property name="Oracle" value="oracle" />
+    </databaseIdProvider>
+    <mappers>
+        <mapper resource="mapper/UserMapper.xml"></mapper>
+        <mapper resource="mapper/RoleMapper.xml"></mapper>
+        <mapper resource="mapper/AddressMapper.xml"></mapper>
+    </mappers>
+</configuration>
