@@ -21,7 +21,6 @@ public class User {
     private String userRoleName;
     private Role roles;
 
-
     private List<Address> addresss;
 
     public List<Address> getAddresss() {
